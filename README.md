@@ -20,6 +20,9 @@ Or install it yourself as:
 
 ## Usage
 
+* There is ZERO configuration.  It makes some assumptions.
+* Putting the gem in your Gemfile and restart your app.
+* Now you have beautiful logs.
 * Use the source.
 * There are a bunch of CONSTANTS defined in the code, and everything this gem does is driven by them.
 * Override them for magic.

@@ -4,10 +4,12 @@ You want Humorous Log Levels and Color (in Rails development)?  Can chickens tur
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your application's Gemfile in the `:development` group:
 
 ```ruby
-gem 'humorous_log_formatter'
+group :development do
+  gem 'humorous_log_formatter'
+end
 ```
 
 And then execute:

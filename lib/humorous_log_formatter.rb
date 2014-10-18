@@ -14,6 +14,11 @@ module HumorousLogFormatter
     #include ActiveSupport::TaggedLogging::Formatter
     SEVERITY_TO_TAG_MAP = {'DEBUG' => 'meh', 'INFO' => 'fyi', 'WARN' => 'hmm', 'ERROR' => 'wtf', 'FATAL' => 'omg', 'UNKNOWN' => '???'}
     SEVERITY_TO_COLOR_MAP = {'DEBUG' => '0;37', 'INFO' => '32', 'WARN' => '33', 'ERROR' => '31', 'FATAL' => '31', 'UNKNOWN' => '37'}
+    TIME_FORMAT = "%Y-%m-%d %H:%M:%S."
+    SKIP_TIME = true
+    SUPER_TIME_PRECISION = 3
+    SUPER_TIME_PRECISION_STOP_INDEX = SUPER_TIME_PRECISION - 1
+    USE_SUPER_TIME = SUPER_TIME_PRECISION > 0
     USE_HUMOROUS_SEVERITIES = begin
       if ENV['LOG_HUMOR']
         ENV['LOG_HUMOR'] != 'false' # Default to true
@@ -38,20 +43,24 @@ module HumorousLogFormatter
     FORMATTED_MESSAGE = if USE_COLOR
                           lambda { |severity, formatted_time, msg|
                             color = SEVERITY_TO_COLOR_MAP[severity]
-                            "[\033[#{color}m#{formatted_time}\033[0m] [\033[#{color}m#{FORMATTED_SEVERITY.call(severity)}\033[0m] #{msg.strip}\n"
+                            res = ''
+                            res << "[\033[#{color}m#{formatted_time}\033[0m] " if formatted_time
+                            res << "[\033[#{color}m#{FORMATTED_SEVERITY.call(severity)}\033[0m] #{msg.strip}\n"
                           }
                         else
                           lambda { |severity, formatted_time, msg|
-                            "[#{formatted_time}] [#{FORMATTED_SEVERITY.call(severity)}] #{msg.strip}\n"
+                            res = ''
+                            res << "[#{formatted_time}]" if formatted_time
+                            res << "[#{FORMATTED_SEVERITY.call(severity)}] #{msg.strip}\n"
                           }
                         end
 
     def exception_values(e)
       trace = e.backtrace.select { |x| !line.starts_with?(THIS_FILE_PATH) }
       trace = trace.map { |l| colorize_exception(l) } if USE_COLOR
-      first = "\n" + trace.first + ": " + e.message + " (#{e.class})"
-      rest = "\t" + trace[1..-1].join("\n\t")
-      return first + "\n" + rest
+      first = "\n#{trace.first}: #{e.message} (#{e.class})"
+      rest = "\t#{trace[1..-1].join("\n\t")}"
+      "#{first}\n#{rest}"
     end
 
     def colorize_exception(line)
@@ -59,13 +68,18 @@ module HumorousLogFormatter
     end
 
     def call(severity, time, progname, msg)
-      formatted_time = time.strftime("%Y-%m-%d %H:%M:%S.") << time.usec.to_s[0..2].rjust(3)
+      if SKIP_TIME
+        formatted_time = nil
+      else
+        formatted_time = time.strftime(TIME_FORMAT)
+        formatted_time << time.usec.to_s[0..(SUPER_TIME_PRECISION_STOP_INDEX)].rjust(SUPER_TIME_PRECISION) if USE_SUPER_TIME
+      end
       text = if msg.is_a? String
                msg
              elsif msg.is_a? Exception
-               " --> Exception: " + exception_values(msg)
+               "  --> Exception:#{exception_values(msg)}"
              else
-               "!!!!! UNKNOWN TYPE: #{msg.class}" + msg.to_s
+               "!!!!! UNKNOWN TYPE: #{msg.class} #{msg.to_s}"
              end
       FORMATTED_MESSAGE.call(severity, formatted_time, text)
     end

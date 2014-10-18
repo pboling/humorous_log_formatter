@@ -10,12 +10,18 @@ require "humorous_log_formatter/version"
 
 module HumorousLogFormatter
   class LogFormatter
-    # TODO: For Rails 4, uncomment the line below
-    #include ActiveSupport::TaggedLogging::Formatter
+
+    # Make it work with Rails 4
+    if defined?(Rails)
+      if ::Rails::VERSION::MAJOR >= 4
+        include ActiveSupport::TaggedLogging::Formatter
+      end
+    end
+
     SEVERITY_TO_TAG_MAP = {'DEBUG' => 'meh', 'INFO' => 'fyi', 'WARN' => 'hmm', 'ERROR' => 'wtf', 'FATAL' => 'omg', 'UNKNOWN' => '???'}
     SEVERITY_TO_COLOR_MAP = {'DEBUG' => '0;37', 'INFO' => '32', 'WARN' => '33', 'ERROR' => '31', 'FATAL' => '31', 'UNKNOWN' => '37'}
     TIME_FORMAT = "%Y-%m-%d %H:%M:%S."
-    SKIP_TIME = true
+    SKIP_TIME = !Rails.env.development? # because heroku already prints the time, override if you use in prod and aren't on Heroku
     SUPER_TIME_PRECISION = 3
     SUPER_TIME_PRECISION_STOP_INDEX = SUPER_TIME_PRECISION - 1
     USE_SUPER_TIME = SUPER_TIME_PRECISION > 0

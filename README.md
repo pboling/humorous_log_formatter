@@ -2,6 +2,8 @@
 
 You want Humorous Log Levels and Color?  Can chickens turtle all the way down?  Of course!
 
+Works with Rails 3 & 4!
+
 ## Installation
 
 Add this line to your application's Gemfile in the `:development` group, or wherever else you want awesome logs:

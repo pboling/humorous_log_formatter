@@ -1,10 +1,10 @@
 # HumorousLogFormatter
 
-You want Humorous Log Levels and Color (in Rails development)?  Can chickens turtle all the way down?  Of course!
+You want Humorous Log Levels and Color?  Can chickens turtle all the way down?  Of course!
 
 ## Installation
 
-Add this line to your application's Gemfile in the `:development` group:
+Add this line to your application's Gemfile in the `:development` group, or wherever else you want awesome logs:
 
 ```ruby
 group :development do
